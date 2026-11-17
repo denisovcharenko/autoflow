@@ -13,7 +13,7 @@ export function createPublishers(env, sleep = delay) {
     publishers.threads = createThreads({ token: token('THREADS_ACCESS_TOKEN'), sleep });
   }
   if (token('INSTAGRAM_ACCESS_TOKEN')) {
-    publishers.instagram = createInstagram({ token: token('INSTAGRAM_ACCESS_TOKEN'), sleep });
+    publishers.instagram = createInstagram({ token: token('INSTAGRAM_ACCESS_TOKEN'), userId: env.INSTAGRAM_USER_ID?.trim(), sleep });
   }
   if (token('LINKEDIN_ACCESS_TOKEN')) {
     publishers.linkedin = createLinkedIn({ token: token('LINKEDIN_ACCESS_TOKEN'), sleep });

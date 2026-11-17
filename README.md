@@ -66,6 +66,7 @@
 3. Там само додай змінні:
    - `MEDIA_BASE_URL`: `https://ТВІЙ-ЛОГІН.github.io/НАЗВА-РЕПОЗИТОРІЮ`
    - `TIMEZONE`: `Europe/Kyiv`
+   - `INSTAGRAM_USER_ID`: лише якщо токен Instagram починається з `EA` (Unified login). ID акаунта є в Business Suite → Settings → Instagram accounts.
 
 Мережу можна не підключати: якщо токена немає, а мережа вказана в рядку, цей рядок отримає статус `failed` із поясненням.
 

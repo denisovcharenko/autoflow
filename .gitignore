@@ -3,3 +3,7 @@ node_modules/
 *.local
 service-account*.json
 .DS_Store
+
+# iCloud sync duplicates
+* 2
+* 2.*

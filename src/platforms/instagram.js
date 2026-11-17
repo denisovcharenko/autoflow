@@ -7,7 +7,7 @@ const STATUS_MAX_POLLS = 20;
 
 // Instagram Login tokens ("IG...") talk to graph.instagram.com. Unified login issues
 // Facebook tokens ("EA..."), which reach the same account through graph.facebook.com.
-export function createInstagram({ token, sleep }) {
+export function createInstagram({ token, userId, sleep }) {
   const headers = { Authorization: `Bearer ${token}` };
   const viaFacebook = token.startsWith('EA');
   const BASE = viaFacebook ? FACEBOOK_BASE : INSTAGRAM_BASE;
@@ -16,30 +16,16 @@ export function createInstagram({ token, sleep }) {
     if (!viaFacebook) {
       return (await request(`${BASE}/me?fields=user_id,username`, { headers })).data;
     }
+    // A Unified login token can't always list its accounts, so the ID can be given directly.
+    if (userId) {
+      const { data } = await request(`${BASE}/${userId}?fields=id,username`, { headers });
+      return { user_id: data.id, username: data.username };
+    }
     const fields = encodeURIComponent('instagram_business_account{id,username}');
-    // A user or system-user token lists its Pages; a Page token is the Page itself.
     const { data: pages } = await request(`${BASE}/me/accounts?fields=${fields}`, { headers });
-    let account = pages.data?.find((page) => page.instagram_business_account)?.instagram_business_account;
+    const account = pages.data?.find((page) => page.instagram_business_account)?.instagram_business_account;
     if (!account) {
-      const { data: me } = await request(`${BASE}/me?fields=${fields}`, { headers }).catch(() => ({ data: {} }));
-      account = me.instagram_business_account;
-    }
-    if (!account) {
-      // Unified login tokens may see no Pages at all; the granted Instagram account
-      // is then listed in the token's own permissions.
-      const query = new URLSearchParams({ input_token: token });
-      const { data: debug } = await request(`${BASE}/debug_token?${query}`, { headers });
-      const scope = debug.data?.granular_scopes?.find((s) => s.scope === 'instagram_content_publish');
-      const id = scope?.target_ids?.[0];
-      if (id) {
-        const { data: ig } = await request(`${BASE}/${id}?fields=id,username`, { headers });
-        account = { id: ig.id, username: ig.username };
-      }
-    }
-    if (!account) {
-      throw new Error(
-        `No Instagram professional account is linked to this token (${pages.data?.length ?? 0} Facebook Page(s) visible)`,
-      );
+      throw new Error('No Instagram account visible to this token; set the INSTAGRAM_USER_ID variable');
     }
     return { user_id: account.id, username: account.username };
   };
