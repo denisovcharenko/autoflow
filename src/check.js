@@ -22,6 +22,9 @@ for (const platform of ['threads', 'instagram', 'linkedin']) {
   } catch (error) {
     ok = false;
     console.log(`${platform}: FAILED, ${error.message}`);
+    // Enough to spot a wrong paste (a URL, an app ID) without exposing the token.
+    const token = process.env[`${platform.toUpperCase()}_ACCESS_TOKEN`].trim();
+    console.log(`  token shape: ${token.length} characters, starts with "${token.slice(0, 2)}"`);
   }
 }
 
