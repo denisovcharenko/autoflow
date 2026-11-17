@@ -126,3 +126,13 @@ test('errors do not leak the access token', async () => {
     return true;
   });
 });
+
+test('instagram uses the Facebook graph for Unified login tokens', async () => {
+  const calls = mockFetch([
+    ['/me/accounts', { data: [{ id: 'page' }, { id: 'page2', instagram_business_account: { id: '9', username: 'me' } }] }],
+  ]);
+  const username = await createInstagram({ token: 'EAAtok', sleep }).check();
+
+  assert.equal(username, 'me');
+  assert.ok(calls[0].url.startsWith('https://graph.facebook.com/'));
+});

@@ -1,13 +1,27 @@
 import { request } from '../http.js';
 
-const BASE = 'https://graph.instagram.com/v26.0';
+const INSTAGRAM_BASE = 'https://graph.instagram.com/v26.0';
+const FACEBOOK_BASE = 'https://graph.facebook.com/v26.0';
 const STATUS_POLL_MS = 15_000;
 const STATUS_MAX_POLLS = 20;
 
+// Instagram Login tokens ("IG...") talk to graph.instagram.com. Unified login issues
+// Facebook tokens ("EA..."), which reach the same account through graph.facebook.com.
 export function createInstagram({ token, sleep }) {
   const headers = { Authorization: `Bearer ${token}` };
+  const viaFacebook = token.startsWith('EA');
+  const BASE = viaFacebook ? FACEBOOK_BASE : INSTAGRAM_BASE;
 
-  const getUser = async () => (await request(`${BASE}/me?fields=user_id,username`, { headers })).data;
+  const getUser = async () => {
+    if (!viaFacebook) {
+      return (await request(`${BASE}/me?fields=user_id,username`, { headers })).data;
+    }
+    const fields = 'instagram_business_account{id,username}';
+    const { data } = await request(`${BASE}/me/accounts?fields=${encodeURIComponent(fields)}`, { headers });
+    const account = data.data?.find((page) => page.instagram_business_account)?.instagram_business_account;
+    if (!account) throw new Error('No Instagram professional account is linked to this token');
+    return { user_id: account.id, username: account.username };
+  };
 
   const waitUntilReady = async (containerId) => {
     for (let poll = 0; poll < STATUS_MAX_POLLS; poll++) {

@@ -23,6 +23,11 @@ for (const { secret, url, grantType } of TOKENS) {
     console.log(`${secret}: not set, skipped`);
     continue;
   }
+  if (secret === 'INSTAGRAM_ACCESS_TOKEN' && token.startsWith('EA')) {
+    // Unified login tokens are Facebook tokens; this endpoint only refreshes Instagram Login ones.
+    console.log(`${secret}: Facebook token, skipped`);
+    continue;
+  }
   try {
     const query = new URLSearchParams({ grant_type: grantType, access_token: token });
     const { data } = await request(`${url}?${query}`);
