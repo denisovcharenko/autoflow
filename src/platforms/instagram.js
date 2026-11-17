@@ -25,6 +25,18 @@ export function createInstagram({ token, sleep }) {
       account = me.instagram_business_account;
     }
     if (!account) {
+      // Unified login tokens may see no Pages at all; the granted Instagram account
+      // is then listed in the token's own permissions.
+      const query = new URLSearchParams({ input_token: token });
+      const { data: debug } = await request(`${BASE}/debug_token?${query}`, { headers });
+      const scope = debug.data?.granular_scopes?.find((s) => s.scope === 'instagram_content_publish');
+      const id = scope?.target_ids?.[0];
+      if (id) {
+        const { data: ig } = await request(`${BASE}/${id}?fields=id,username`, { headers });
+        account = { id: ig.id, username: ig.username };
+      }
+    }
+    if (!account) {
       throw new Error(
         `No Instagram professional account is linked to this token (${pages.data?.length ?? 0} Facebook Page(s) visible)`,
       );

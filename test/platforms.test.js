@@ -136,3 +136,13 @@ test('instagram uses the Facebook graph for Unified login tokens', async () => {
   assert.equal(username, 'me');
   assert.ok(calls[0].url.startsWith('https://graph.facebook.com/'));
 });
+
+test('instagram finds the account in token scopes when no Page is visible', async () => {
+  mockFetch([
+    ['/me/accounts', { data: [] }],
+    ['/me?', {}],
+    ['/debug_token', { data: { granular_scopes: [{ scope: 'instagram_content_publish', target_ids: ['17'] }] } }],
+    ['/17?', { id: '17', username: 'me' }],
+  ]);
+  assert.equal(await createInstagram({ token: 'EAAtok', sleep }).check(), 'me');
+});
