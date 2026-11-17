@@ -93,6 +93,8 @@ npm run post:dry
 
 `check` показує, чи працює кожен доступ. `post:dry` показує, що було б опубліковано, і нічого не змінює.
 
+Те саме без локального `.env`: Actions → Check access → Run workflow.
+
 Для першого реального тесту постав один пост на `threads`, а в GitHub відкрий Actions → Publish due posts → Run workflow.
 
 ## Що варто знати
