@@ -18,7 +18,7 @@ const TOKENS = [
 let ok = true;
 
 for (const { secret, url, grantType } of TOKENS) {
-  const token = process.env[secret];
+  const token = process.env[secret]?.trim();
   if (!token) {
     console.log(`${secret}: not set, skipped`);
     continue;

@@ -6,15 +6,17 @@ import { createThreads } from './threads.js';
 // Only platforms with a token are created, so a network can be added later
 // without touching the rest of the flow.
 export function createPublishers(env, sleep = delay) {
+  // Tokens pasted from the clipboard often carry a trailing newline, which breaks them.
+  const token = (name) => env[name]?.trim();
   const publishers = {};
-  if (env.THREADS_ACCESS_TOKEN) {
-    publishers.threads = createThreads({ token: env.THREADS_ACCESS_TOKEN, sleep });
+  if (token('THREADS_ACCESS_TOKEN')) {
+    publishers.threads = createThreads({ token: token('THREADS_ACCESS_TOKEN'), sleep });
   }
-  if (env.INSTAGRAM_ACCESS_TOKEN) {
-    publishers.instagram = createInstagram({ token: env.INSTAGRAM_ACCESS_TOKEN, sleep });
+  if (token('INSTAGRAM_ACCESS_TOKEN')) {
+    publishers.instagram = createInstagram({ token: token('INSTAGRAM_ACCESS_TOKEN'), sleep });
   }
-  if (env.LINKEDIN_ACCESS_TOKEN) {
-    publishers.linkedin = createLinkedIn({ token: env.LINKEDIN_ACCESS_TOKEN, sleep });
+  if (token('LINKEDIN_ACCESS_TOKEN')) {
+    publishers.linkedin = createLinkedIn({ token: token('LINKEDIN_ACCESS_TOKEN'), sleep });
   }
   return publishers;
 }
