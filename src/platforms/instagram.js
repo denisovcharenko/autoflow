@@ -16,10 +16,19 @@ export function createInstagram({ token, sleep }) {
     if (!viaFacebook) {
       return (await request(`${BASE}/me?fields=user_id,username`, { headers })).data;
     }
-    const fields = 'instagram_business_account{id,username}';
-    const { data } = await request(`${BASE}/me/accounts?fields=${encodeURIComponent(fields)}`, { headers });
-    const account = data.data?.find((page) => page.instagram_business_account)?.instagram_business_account;
-    if (!account) throw new Error('No Instagram professional account is linked to this token');
+    const fields = encodeURIComponent('instagram_business_account{id,username}');
+    // A user or system-user token lists its Pages; a Page token is the Page itself.
+    const { data: pages } = await request(`${BASE}/me/accounts?fields=${fields}`, { headers });
+    let account = pages.data?.find((page) => page.instagram_business_account)?.instagram_business_account;
+    if (!account) {
+      const { data: me } = await request(`${BASE}/me?fields=${fields}`, { headers }).catch(() => ({ data: {} }));
+      account = me.instagram_business_account;
+    }
+    if (!account) {
+      throw new Error(
+        `No Instagram professional account is linked to this token (${pages.data?.length ?? 0} Facebook Page(s) visible)`,
+      );
+    }
     return { user_id: account.id, username: account.username };
   };
 
